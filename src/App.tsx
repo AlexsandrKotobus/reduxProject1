@@ -2,8 +2,24 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { DecrementAction, IncrementAction, store } from './store'
+import { useEffect, useReducer } from 'react';
 
 function App() {
+
+  // метод subscribe
+  // редьюсер увеличивающий значение на +1
+  const [, forseUpdate] = useReducer((x) => x + 1, 0);
+  // useEffect нужен для интеграции состояния реакта со внешними стейт-менеджерами,
+  // redux - тоже стейт-менеджер
+  useEffect(()=> {
+    //в метод subscribe мы передаем функцию, ктоторая будет вызываться  каждый раз 
+    // когда у нас приходит экшен в стор
+    // изменился стор - мы forseUpdate перерисовываем компонент App 
+    const unsubscribe = store.subscribe(() =>{
+      forseUpdate()
+    })
+    return unsubscribe
+  }, [])
 
   return (
     <>
