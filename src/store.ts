@@ -1,22 +1,39 @@
 import { configureStore } from '@reduxjs/toolkit'
+
+type CounterState = {
+    counter: number;
+};
+export type CounterId =  string;
+
 // тип состояния
 type State ={
-    counter: number;
+    // для уменьшения ошибок в TS хорошо добавлять | undefined
+    counters: Record <CounterId, CounterState | undefined >
 }
 
 // тип акшена
 export type IncrementAction ={
-    type: 'increment'
+    // поле type - тип экшена
+    type: 'increment';
+     // поле payload - полезная информ, тут - id
+    payload: {
+       counterId: CounterId;
+    }
 }
 export type DecrementAction ={
-    type: 'decrement'
+    type: 'decrement';
+    payload: {
+        counterId: CounterId;
+    }
 } 
 // юнит 2х типов
 type Action = IncrementAction | DecrementAction;
 
+
+const initialCounterState: CounterState = {counter: 0}
 // начальное дефолтное состояние
 const initialState: State ={
-    counter: 0,
+    counters: {},
 }
 
 // делаем редьюсер
@@ -24,21 +41,39 @@ const initialState: State ={
 const  reducer = (state =initialState, action: Action): State => {
     //логика редьюсера
     switch (action.type){
-        case 'increment':
+        case 'increment':{
+            const {counterId} = action.payload;
+            // поле опциональное поэтому надо добавить 
+            const currentCounter = state.counters[counterId] ?? initialCounterState;
             return {
                 ...state,
-                counter: state.counter + 1,
+                counters: {
+                    ...state.counters,
+                    [counterId]: {
+                        ...currentCounter,
+                        counter: currentCounter.counter +1
+                    }
+                }
             };
-        case 'decrement':
-                return {
-                    ...state,
-                    counter: state.counter -1,
-                };
-        default: 
+        }
+        
+        case 'decrement':{
+            const {counterId} = action.payload;
+            const currentCounter = state.counters[counterId] ?? initialCounterState;
+            return {
+                ...state,
+                counters: {
+                    ...state.counters,
+                    [counterId]: {
+                        ...currentCounter,
+                        counter: currentCounter.counter -1
+                    }
+                }
+            };
+        }
+        default:
             return state;
-            
-     }
-                
+    }       
 }
 
 // создаем store
