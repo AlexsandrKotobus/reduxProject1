@@ -1,8 +1,8 @@
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { CounterId, DecrementAction, IncrementAction, store } from './store'
-import { useEffect, useReducer } from 'react';
+import { AppState, CounterId, DecrementAction, IncrementAction, store } from './store'
+import { useEffect, useReducer, useRef } from 'react';
 
 function App() {
   return (
@@ -29,18 +29,32 @@ function App() {
     </>
   )
 }
+const selectCounter = (state: AppState, counterId: CounterId) => state.counters[counterId]
+
 
 export function Counter ({counterId}: {counterId: CounterId}){
   const [, forseUpdate] = useReducer((x) => x + 1, 0);
+  console.log('render counter', counterId)
+  // с помощью useRef храним между ререндерами предыдущее состояние
+const lastStateRef = useRef<ReturnType<typeof selectCounter>>()
   useEffect(()=> {
       const unsubscribe = store.subscribe(() =>{
-      forseUpdate()
+        // текущее состояние
+        const currentState = selectCounter(store.getState(), counterId);
+        // предыдущее состояние
+        const lastState = lastStateRef.current; 
+        if(currentState !== lastState){
+          forseUpdate()
+        }
+        // сохраняем предыдущее состояние
+        lastStateRef.current = currentState;
     })
     return unsubscribe
-  }, [])
+  }, []);
+  const counterState = selectCounter(store.getState(), counterId)
   return(
     <>
-    counter {store.getState().counters[counterId]?.counter}
+    counter {counterState?.counter}
       
         <button 
         onClick={() =>
