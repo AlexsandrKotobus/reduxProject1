@@ -1,8 +1,9 @@
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { AppState, CounterId, DecrementAction, IncrementAction, store } from './store'
-import { useEffect, useReducer, useRef } from 'react';
+import { AppState, CounterId, DecrementAction, IncrementAction, useAppSelector } from './store'
+// import { useEffect, useReducer, useRef } from 'react';
+import { useDispatch  } from 'react-redux';
 
 function App() {
   return (
@@ -33,36 +34,40 @@ const selectCounter = (state: AppState, counterId: CounterId) => state.counters[
 
 
 export function Counter ({counterId}: {counterId: CounterId}){
-  const [, forseUpdate] = useReducer((x) => x + 1, 0);
+  const dispatch = useDispatch();
+  
+  const counterState = useAppSelector((state) =>selectCounter(state, counterId));
+
+//   const [, forseUpdate] = useReducer((x) => x + 1, 0);
   console.log('render counter', counterId)
-  // с помощью useRef храним между ререндерами предыдущее состояние
-const lastStateRef = useRef<ReturnType<typeof selectCounter>>()
-  useEffect(()=> {
-      const unsubscribe = store.subscribe(() =>{
-        // текущее состояние
-        const currentState = selectCounter(store.getState(), counterId);
-        // предыдущее состояние
-        const lastState = lastStateRef.current; 
-        if(currentState !== lastState){
-          forseUpdate()
-        }
-        // сохраняем предыдущее состояние
-        lastStateRef.current = currentState;
-    })
-    return unsubscribe
-  }, []);
-  const counterState = selectCounter(store.getState(), counterId)
+//   // с помощью useRef храним между ререндерами предыдущее состояние
+// const lastStateRef = useRef<ReturnType<typeof selectCounter>>()
+//   useEffect(()=> {
+//       const unsubscribe = store.subscribe(() =>{
+//         // текущее состояние
+//         const currentState = selectCounter(store.getState(), counterId);
+//         // предыдущее состояние
+//         const lastState = lastStateRef.current; 
+//         if(currentState !== lastState){
+//           forseUpdate()
+//         }
+//         // сохраняем предыдущее состояние
+//         lastStateRef.current = currentState;
+//     })
+//     return unsubscribe
+//   }, []);
+
   return(
     <>
     counter {counterState?.counter}
       
         <button 
         onClick={() =>
-          store.dispatch({ type: 'increment', payload: {counterId} } satisfies IncrementAction)}>
+          dispatch({ type: 'increment', payload: {counterId} } satisfies IncrementAction)}>
           increment
         </button>
         <button  onClick={() => 
-          store.dispatch({type: 'decrement', payload: {counterId}} satisfies DecrementAction)
+          dispatch({type: 'decrement', payload: {counterId}} satisfies DecrementAction)
         }
         >
           decrement
